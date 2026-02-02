@@ -4,14 +4,12 @@ import { useAtomValue } from 'jotai'
 import { isPrivateViewAtom } from './dashboard-store'
 import { cn } from '@/lib/utils'
 import { ArrowUpRight, ArrowDownLeft, Wallet, ShieldCheck, Activity, LineChart } from 'lucide-react'
+import { useShield } from '@/components/shield/shield-provider'
 import { useState, useEffect } from 'react'
 
 export function DashboardFeature() {
   const isPrivate = useAtomValue(isPrivateViewAtom)
-  const [privateBalance, setPrivateBalance] = useState<number>(0)
-
-  // Note: Real balance will be fetched via ShieldProvider context when available client-side
-  // For now, we use a placeholder. The useShield hook cannot be imported here due to WASM/SSR issues.
+  const { privateBalance } = useShield()
 
   return (
     <div className="space-y-8">

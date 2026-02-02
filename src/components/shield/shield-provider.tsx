@@ -11,9 +11,13 @@ import { VersionedTransaction } from '@solana/web3.js'
 interface ShieldContextType {
     sdk: PrivacyCash | null
     isShielding: boolean
+    isWithdrawing: boolean
     shieldAmount: number
+    unshieldAmount: number
     setShieldAmount: (amount: number) => void
+    setUnshieldAmount: (amount: number) => void
     deposit: () => Promise<void>
+    withdraw: () => Promise<void>
     refreshBalance: () => Promise<void>
     privateBalance: number // in SOL
 }
@@ -21,9 +25,13 @@ interface ShieldContextType {
 const ShieldContext = createContext<ShieldContextType>({
     sdk: null,
     isShielding: false,
+    isWithdrawing: false,
     shieldAmount: 0,
+    unshieldAmount: 0,
     setShieldAmount: () => { },
+    setUnshieldAmount: () => { },
     deposit: async () => { },
+    withdraw: async () => { },
     refreshBalance: async () => { },
     privateBalance: 0,
 })
@@ -38,7 +46,9 @@ export const ShieldProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     // State
     const [isShielding, setIsShielding] = useState(false)
+    const [isWithdrawing, setIsWithdrawing] = useState(false)
     const [shieldAmount, setShieldAmount] = useState<number>(0)
+    const [unshieldAmount, setUnshieldAmount] = useState<number>(0)
     const [privateBalance, setPrivateBalance] = useState<number>(0)
 
     // Create a "Session Keypair" or derive one for the SDK (since SDK needs a keypair in constructor)
@@ -95,7 +105,7 @@ export const ShieldProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         try {
             const bal = await sdk.getPrivateBalance()
             console.log("Private Balance (Lamports):", bal)
-            setPrivateBalance(Number(bal) / 1e9) // Convert lamports to SOL
+            setPrivateBalance(bal.lamports / 1e9) // Convert lamports to SOL
         } catch (e) {
             console.error("Error refreshing balance:", e)
         }
@@ -186,14 +196,51 @@ export const ShieldProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
     }
 
+    const withdraw = async () => {
+        if (!sdk || !publicKey) {
+            toast.error("Wallet not connected")
+            return
+        }
+
+        if (unshieldAmount <= 0) {
+            toast.error("Enter a valid amount to unshield")
+            return
+        }
+
+        try {
+            setIsWithdrawing(true)
+            const lamports = unshieldAmount * 1e9
+
+            console.log(`Unshielding ${unshieldAmount} SOL to ${publicKey.toString()}...`)
+
+            const res = await sdk.withdraw({
+                lamports,
+                recipientAddress: publicKey.toString()
+            })
+
+            toast.success(`Unshielded ${unshieldAmount} SOL successfully!`)
+            setUnshieldAmount(0)
+            refreshBalance()
+        } catch (error) {
+            console.error("Withdraw failed:", error)
+            toast.error("Withdraw failed: " + (error as any).message)
+        } finally {
+            setIsWithdrawing(false)
+        }
+    }
+
     return (
         <ShieldContext.Provider
             value={{
                 sdk,
                 isShielding,
+                isWithdrawing,
                 shieldAmount,
+                unshieldAmount,
                 setShieldAmount,
+                setUnshieldAmount,
                 deposit,
+                withdraw,
                 refreshBalance,
                 privateBalance,
             }}

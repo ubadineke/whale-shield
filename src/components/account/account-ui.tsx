@@ -49,18 +49,42 @@ export function AccountBalanceCheck({ address }: { address: PublicKey }) {
   if (query.isLoading) {
     return null
   }
-  if (query.isError || !query.data) {
+  if (query.isError) {
     return (
       <AppAlert
         action={
-          <Button variant="outline" onClick={() => mutation.mutateAsync(1).catch((err) => console.log(err))}>
-            Request Airdrop
+          <Button variant="outline" onClick={() => query.refetch()}>
+            Retry
           </Button>
         }
       >
-        You are connected to <strong>{cluster.name}</strong> but your account is not found on this cluster.
+        Error connecting to <strong>{cluster.name}</strong>. The RPC endpoint may be invalid or down.
       </AppAlert>
     )
+  }
+
+  if (query.data === 0) {
+    return (
+      <AppAlert
+        action={
+          cluster.network?.includes('mainnet') ? null : (
+            <Button variant="outline" onClick={() => mutation.mutateAsync(1).catch((err) => console.log(err))}>
+              Request Airdrop
+            </Button>
+          )
+        }
+      >
+        {cluster.network?.includes('mainnet') ? (
+          <span>You have 0 SOL on <strong>{cluster.name}</strong>. You'll need some SOL to use the Privacy Shield.</span>
+        ) : (
+          <span>You are connected to <strong>{cluster.name}</strong> but have no SOL. Request an airdrop to get started.</span>
+        )}
+      </AppAlert>
+    )
+  }
+
+  if (!query.data) {
+    return null
   }
   return null
 }

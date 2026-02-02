@@ -99,9 +99,14 @@ export default function TradeFeatureInner() {
                     </div>
                     <div className="flex items-center gap-4">
                         <Input
-                            type="number"
+                            type="text"
                             value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value
+                                if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                                    setAmount(val)
+                                }
+                            }}
                             className="bg-transparent border-none text-2xl font-mono focus-visible:ring-0 p-0"
                             placeholder="0.00"
                         />
@@ -147,10 +152,10 @@ export default function TradeFeatureInner() {
                                     className="h-full bg-primary transition-all duration-1000"
                                     style={{
                                         width: `${progress.step === 'INITIALIZING' ? 10 :
-                                                progress.step === 'WITHDRAWING_FROM_POOL' ? 30 :
-                                                    progress.step === 'WAITING_FOR_FUNDS' ? 50 :
-                                                        progress.step === 'SWAPPING_ON_JUPITER' ? 75 :
-                                                            progress.step === 'SHIELDING_RESULTS' ? 90 : 100
+                                            progress.step === 'WITHDRAWING_FROM_POOL' ? 30 :
+                                                progress.step === 'WAITING_FOR_FUNDS' ? 50 :
+                                                    progress.step === 'SWAPPING_ON_JUPITER' ? 75 :
+                                                        progress.step === 'SHIELDING_RESULTS' ? 90 : 100
                                             }%`
                                     }}
                                 />

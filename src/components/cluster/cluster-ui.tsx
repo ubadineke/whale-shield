@@ -39,15 +39,20 @@ export function ClusterChecker({ children }: { children: ReactNode }) {
   }
   if (query.isError || !query.data) {
     return (
-      <AppAlert
-        action={
-          <Button variant="outline" onClick={() => query.refetch()}>
-            Refresh
-          </Button>
-        }
-      >
-        Error connecting to cluster <span className="font-bold">{cluster.name}</span>.
-      </AppAlert>
+      <>
+        <div className="fixed bottom-4 right-4 z-[9999] max-w-sm animate-in fade-in slide-in-from-bottom-4">
+          <AppAlert
+            action={
+              <Button size="sm" variant="outline" onClick={() => query.refetch()}>
+                Retry
+              </Button>
+            }
+          >
+            <span className="text-sm">Connection unstable on <span className="font-bold">{cluster.name}</span>. Features might be limited.</span>
+          </AppAlert>
+        </div>
+        {children}
+      </>
     )
   }
   return children

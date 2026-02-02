@@ -24,7 +24,12 @@ export enum ClusterNetwork {
 export const defaultClusters: SolanaCluster[] = [
   {
     name: 'mainnet-beta',
-    endpoint: 'https://mainnet.helius-rpc.com/?api-key=1d8740dc-e5f4-421c-b823-e1bad1889eff',
+    endpoint: `https://mainnet.helius-rpc.com/?api-key=${process.env.NEXT_PUBLIC_HELIUS_API_KEY || ''}`,
+    network: ClusterNetwork.Mainnet,
+  },
+  {
+    name: 'mainnet-public',
+    endpoint: 'https://api.mainnet-beta.solana.com',
     network: ClusterNetwork.Mainnet,
   },
   {
@@ -40,8 +45,8 @@ export const defaultClusters: SolanaCluster[] = [
   },
 ]
 
-const clusterAtom = atomWithStorage<SolanaCluster>('solana-cluster', defaultClusters[0])
-const clustersAtom = atomWithStorage<SolanaCluster[]>('solana-clusters', defaultClusters)
+const clusterAtom = atomWithStorage<SolanaCluster>('solana-cluster-v3', defaultClusters[0])
+const clustersAtom = atomWithStorage<SolanaCluster[]>('solana-clusters-v3', defaultClusters)
 
 const activeClustersAtom = atom<SolanaCluster[]>((get) => {
   const clusters = get(clustersAtom)
